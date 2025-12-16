@@ -1,0 +1,165 @@
+version: "3.9"
+
+services:
+  # 1. БАЗА ДАННЫХ
+  db:
+    image: postgres:15
+    container_name: market_db
+    restart: always
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - ./db_init:/docker-entrypoint-initdb.d
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. ZOOKEEPER
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  # 3. KAFKA
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9095:9095"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # 4. KAFKA SETUP
+  kafka-setup:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-setup
+    depends_on:
+      kafka:
+        condition: service_started
+    command: >
+      bash -c "
+        echo 'Waiting for Kafka to be ready...'
+        blocks=0
+        while [ $$blocks -lt 1 ]; do
+          if nc -z kafka 9092; then
+            echo 'Kafka is up!'
+            break
+          fi
+          echo '...waiting for kafka...'
+          sleep 2
+          blocks=$$((blocks+1))
+        done
+        echo '✅ Kafka is ready! Creating topic...'
+        kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic predict_requests --partitions 1 --replication-factor 1
+        echo '✅ Topic created.'
+      "
+
+  # 5. ML WORKER
+  ml_worker:
+    build: .
+    container_name: ml_worker
+    restart: always
+    command: python ml_worker.py
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    volumes:
+      - model_volume:/app/shared_models
+
+  # 6. FRONTEND
+  frontend:
+    build: .
+    container_name: market_ui
+    command: streamlit run dashboard.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+  # 7. INGEST WORKER
+  ingest:
+    build: .
+    container_name: ingest_worker
+    command: python ingest.py
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - TINKOFF_TOKEN
+
+  # 8. ML SCHEDULER
+  scheduler:
+    build: .
+    container_name: ml_scheduler
+    command: python scheduler.py
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - model_volume:/app/shared_models
+
+  # 9. GRAFANA
+  grafana:
+    image: grafana/grafana-oss
+    container_name: market_grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    # ВОТ ЭТО ВАЖНОЕ ИЗМЕНЕНИЕ:
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards_json:/var/lib/grafana/dashboards
+
+volumes:
+  pg_data:
+  model_volume:

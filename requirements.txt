@@ -1,0 +1,13 @@
+git+https://github.com/cia76/TinvestPy.git
+pandas
+psycopg2-binary
+python-dotenv
+protobuf
+keyrings.alt
+ta==0.11.0
+catboost
+scikit-learn
+kafka-python
+streamlit
+plotly
+schedule

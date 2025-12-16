@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: 'MLOps Dashboard'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    # Папка, которую мы пробросили через volumes в docker-compose
+    options:
+      path: /var/lib/grafana/dashboards

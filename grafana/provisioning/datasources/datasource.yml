@@ -1,0 +1,27 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL_ML_DB
+    type: postgres
+    # ВАЖНО: Этот ID должен совпадать с тем, что в JSON дашборда
+    uid: PCC52D03280B7034C
+    
+    access: proxy
+    isDefault: true
+    url: db:5432
+    user: ${POSTGRES_USER}
+    
+    # Пароль берется из переменной окружения
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+      
+    jsonData:
+      database: ${POSTGRES_DB}
+      sslmode: "disable"
+      timescaledb: false
+      maxOpenConns: 0
+      maxIdleConns: 2
+      maxIdleTime: 120
+      postgresVersion: 15
+    version: 1
+    editable: true

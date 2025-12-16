@@ -1,0 +1,4 @@
+.env
+db_init/dump.sql
+__pycache__/
+*.pyc
