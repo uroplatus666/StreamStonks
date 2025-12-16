@@ -88,7 +88,7 @@ project/
 | Сервис | URL | Порт | Описание |
 | :--- | :--- | :--- | :--- |
 | **Streamlit UI** | **[http://localhost:8501](http://localhost:8501)** | `8501` | Основной дашборд приложения (прогнозы и графики) |
-| **Grafana** | **[http://localhost:3000](http://localhost:3000)** | `3000` | Мониторинг метрик и логов. <br>*(Логин/пароль по умолчанию: `admin` / `admin`)* -> Dashboards -> MLOps System Dashboard|
+| **Grafana** | **[http://localhost:3000](http://localhost:3000)** | `3000` | Мониторинг метрик и логов. <br>*(Логин/пароль по умолчанию: `admin` / `admin`)*<br>→ Dashboards → MLOps System Dashboard|
 
 ### ⚙️ Инфраструктура и Базы данных
 
