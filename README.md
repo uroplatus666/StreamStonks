@@ -3,7 +3,7 @@
 Built with microservices architecture using Kafka, PostgreSQL, CatBoost, and Streamlit.  
 Features automated data ingestion, scheduled model retraining, and system health monitoring via Grafana.  
 
-Цены акций выгружаются с помощью [T-Invest API](https://www.tbank.ru/invest/settings/)
+Цены акций выгружаются с помощью [T-Invest API](https://www.tbank.ru/invest/settings/api/)
 
 ---
 
@@ -159,6 +159,10 @@ project/
 ```bash
 git clone https://github.com/uroplatus666/StreamStonks.git
 cd StreamStonks
+```
+- Для live-режима необходимо получить Tinkoff Invest API Token. Делается это за пару кликов [здесь](https://www.tbank.ru/invest/settings/api/)
+- Далее нужно скопировать этот токен в `.env`
+```bash
 # Сборка и запуск всех сервисов
 docker-compose up -d --build
 ```
@@ -185,6 +189,7 @@ __________________________________________________
 ![example-1](images/grafana3.jpg)
 __________________________________________________
 </details>
+
 
 
 
