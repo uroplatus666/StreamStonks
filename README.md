@@ -3,8 +3,8 @@
 Built with microservices architecture using Kafka, PostgreSQL, CatBoost, and Streamlit.  
 Features automated data ingestion, scheduled model retraining, and system health monitoring via Grafana.  
 
-Цены акций выгружаются с помощью [T-Invest API](https://www.tinkoff.ru/invest/)
-## ✏️ Структура проекта
+Цены акций выгружаются с помощью [T-Invest API](https://www.tbank.ru/invest/settings/)
+
 ---
 
 ## 💰 Бизнес-ценность
@@ -32,6 +32,7 @@ Features automated data ingestion, scheduled model retraining, and system health
 * **UI:** Streamlit
 
 ---
+## ✏️ Структура проекта
 ```
 project/
 ├── docker-compose.yml        # Описывает запуск всех сервисов
@@ -189,6 +190,7 @@ __________________________________________________
 __________________________________________________
 
 </details>
+
 
 
 
