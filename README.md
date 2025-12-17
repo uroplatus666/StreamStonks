@@ -1,4 +1,6 @@
 
+Участники команды: Диденко Мария. Всё)
+
 ## **StreamStonks**: An end-to-end MLOps platform for real-time stock price prediction.  
 Built with microservices architecture using Kafka, PostgreSQL, CatBoost, and Streamlit.  
 Features automated data ingestion, scheduled model retraining, and system health monitoring via Grafana.  
@@ -189,6 +191,7 @@ __________________________________________________
 ![example-1](images/grafana3.jpg)
 __________________________________________________
 </details>
+
 
 
 
